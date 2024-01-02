@@ -1,4 +1,4 @@
-# NodeJS 로그인 구현을 돕는 passport 라이브러리 사용을 최종 목표로 하기 위한 공부 파일
+# Authentication을 위한 공부 자료
 
 ## `cookie`
 
