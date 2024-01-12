@@ -1,53 +1,38 @@
-const express = require('express')
-const cookieParser = require('cookie-parser')
-const cors = require('cors')
-const dotenv = require('dotenv')
-const { auth } = require('./authMiddleware')
+import express from 'express'
+import cookieParser from 'cookie-parser';
+import { fileURLToPath } from "url";
 
-const { login } = require("./controller/jwtVerify")
+import {
+    login,
+    accessToken,
+    refreshToken,
+    logout
+} from './authController.js';
 
-var app = express();
-dotenv.config();
+//esModule에서 __dirname을 가져올 수 있게 하는 방법
+const __dirname = fileURLToPath(new URL(".", import.meta.url));
+const app = express();
 
-app.use(cookieParser());
-app.use(express.json());
-app.use(cors({
-    origin: "http:localhost:3000",
-    methods: ["GET", "POST"],
-    credentials: true,
-}))
+app.use(express.static(__dirname))
+//req.body 객체를 받아올 수 있게 함
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
+//req.cookies 객체를 받아올 수 있게 함
+app.use(cookieParser())
 
-app.get("/login", auth, login);
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/index.html')
+})
 
-app.listen(process.env.PORT)
+//accessToken, refreshToken 생성
+app.post('/login', login)
+//인증 후 데이터 응답
+app.get("/accesstoken", accessToken);
+//유효기간이 짧은 accessToken을 갱신
+app.get("/refreshtoken", refreshToken);
+//accessToken을 제거
+app.get("/logout", logout);
 
-// app.get("/login", (req, res) => {
-//     console.log(req.headers.authorization)
-//     const email = "google@gmail.com"
-//     const name = "kr_user01"
-
-//     //jwt.sign(payload, secretOrPrivateKey, [options, callback])
-//     token = jwt.sign({
-//         type: 'JWT',
-//         email: email,
-//         name: name
-//     }, SECRET_KEY, {
-//         expiresIn: '15m', // 만료시간 15분
-//     });
-
-//     res.cookie('Authorization', `Bearer ${token}`)
-    
-//     res.send("Set JWT to Cookie")
-// })
-// app.get('/payload', auth, (req, res) => {
-//     const nickname = req.decoded.nickname;
-//     const profile = req.decoded.profile;
-//     return res.status(200).json({
-//         code: 200,
-//         message: '토큰은 정상입니다.',
-//         data: {
-//             nickname: nickname,
-//             profile: profile
-//         }
-//     });
-// });
+app.listen(3000, () => {
+    console.log('http://localhost:3000')
+});
