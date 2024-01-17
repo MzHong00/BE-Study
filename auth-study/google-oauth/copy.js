@@ -14,7 +14,7 @@ const oAuth2Client = new OAuth2Client(
   keys.web.redirect_uris[0]
 );
 
-app.get('/', async(req, res) => {
+app.get('/', async (req, res) => {
   let user = {};
   const googleApi = 'https://www.googleapis.com/oauth2/v2/userinfo';
   if (oAuth2Client.credentials.access_token) {
@@ -24,7 +24,7 @@ app.get('/', async(req, res) => {
       }
     })
     user = userInfo.data;
-    console.log(user)
+    console.log(oAuth2Client.credentials.access_token)
   }
 
   res.send(
@@ -37,28 +37,41 @@ app.get('/', async(req, res) => {
   )
 })
 app.get('/login', (req, res) => {
+  //google 로그인해주는 창
   const authorizeUrl = oAuth2Client.generateAuthUrl({
     access_type: 'offline',
     scope: 'https://www.googleapis.com/auth/userinfo.profile',
   });
+  //opn <= 외부 파일을 (여기선 authorizeUrl) 자동으로 열어주는 모듈
   opn(authorizeUrl, { wait: false }).then(cp => cp.unref());
-
-  res.send(authorizeUrl);
 })
+
 app.get('/login/redirect', async (req, res) => {
+  const googleApi = 'https://www.googleapis.com/oauth2/v2/userinfo';
+
   try {
     const { code } = req.query;
     const r = await oAuth2Client.getToken(code);
     oAuth2Client.setCredentials(r.tokens);
 
-    res.send(`<div>
-  <p>login success!!</p>
-  <a href="/">home</a>
-  </div>`)
+    const userInfo = await axios.get(googleApi, {
+      headers: {
+        Authorization: `Bearer ${oAuth2Client.credentials.access_token}`,
+      }
+    })
+
+    console.log(userInfo.data)
+    res.send(`
+    <div>
+      <p>login success!!</p>
+      <a href="/">home</a>
+    </div>
+    `)
   } catch (error) {
     res.status(400).redirect('/')
   }
 })
+
 app.get('/logout', (req, res) => {
   oAuth2Client.revokeCredentials((err, body) => {
     console.log(err, body)
@@ -66,4 +79,4 @@ app.get('/logout', (req, res) => {
   res.send(`<a href="/">home</a>`)
 })
 
-app.listen(3000);
+app.listen(5001);
