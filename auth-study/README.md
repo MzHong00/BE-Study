@@ -21,3 +21,4 @@ passport의 로컬 전략 코드로, 오직 passport만을 이해하기 위해 �
 
 google-oauth-library를 사용하였으며, passport는 사용하지 않은 코드이다.
 index.js 파일은 공식문서의 코드를 express로 변경한 것이고, copy.js 파일은 index.js를 쉽고 친근한 코드로 변경시킨 것이다.
+이 프로젝트만으로는 실행이 안되며, 구글 API 페이지(https://console.cloud.google.com/apis) 에서 다양한 설정을 추가적으로 해줘야 한다.
